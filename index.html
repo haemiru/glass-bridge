@@ -12,6 +12,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Glass Bridge Survival</title>
+  <script
+    src="https://www.paypal.com/sdk/js?client-id=ATwu5_DpWPmppHblpIplZRmSJ6AhP73r_n8A17xzTSGl_BQxiraQMe_s2VO_KMCCZDaB4WzlKIpTltSB&currency=USD"></script>
   <style>
     /* ── Reset ── */
     *,
@@ -161,8 +163,19 @@
   <div id="overlay-start" class="overlay active">
     <h1>Glass Bridge<br>Survival</h1>
     <p class="subtitle">Participant 107 — Choose wisely.</p>
-    <p>Click a glass panel to jump. Survive 10 rows.</p>
-    <button id="btn-start">START GAME</button>
+    <p style="text-align: center;">Click a glass panel to jump.<br>Survive 10 rows.</p>
+    <button id="btn-start" style="margin-bottom: 20px;">START GAME</button>
+    <p id="promo-text" style="font-size: 14px; margin-bottom: 10px; max-width: 300px; color: #ffeb3b;">🌟 Upgrade to 5
+      Lives for just $0.50!<br>Boost your chances and survive the bridge.</p>
+    <button id="btn-google-purchase"
+      style="margin-bottom: 10px; background-color: #4285F4; border-radius: 4px; border: none; padding: 10px 20px; font-weight: bold; cursor: pointer; color: white;">Sign
+      in with Google to Purchase</button>
+    <p id="btn-google-restore"
+      style="font-size: 12px; color: #bbb; text-decoration: underline; cursor: pointer; margin-bottom: 20px;">Already
+      purchased? Log in here to restore.</p>
+    <div id="paypal-button-container" style="width: 250px; max-width: 100%; display: none;"></div>
+    <p id="premium-status" style="color: #00ffc8; font-size: 16px; margin-top: 10px; display: none;">Premium VIP: 5
+      Lives Active!</p>
   </div>
 
   <!-- Success overlay -->
@@ -183,6 +196,96 @@
   <div id="footer">ⓒ JunoMinu Company. All rights reserved.</div>
 
 
+
+  <!-- Firebase Integration -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAEPiiSTAJ-VQAKD9OTZUQcf7H-MY3nvo8",
+      authDomain: "glass-bridge-survival-db.firebaseapp.com",
+      projectId: "glass-bridge-survival-db",
+      storageBucket: "glass-bridge-survival-db.firebasestorage.app",
+      messagingSenderId: "572624488700",
+      appId: "1:572624488700:web:d27eee9962e3ab6bf36f79"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    window.firebaseServices = { auth, db, doc, getDoc, setDoc, onAuthStateChanged, signInWithPopup, GoogleAuthProvider };
+
+    // Shared auth state — accessible from initApp via window
+    window.gameAuthState = { isPremium: false, currentUserUid: null };
+
+    // Register auth listener IMMEDIATELY (not inside initApp)
+    // This ensures login events are never missed regardless of Three.js load timing
+    onAuthStateChanged(auth, async (user) => {
+      const promoText = document.getElementById('promo-text');
+      const btnGooglePurchase = document.getElementById('btn-google-purchase');
+      const btnGoogleRestore = document.getElementById('btn-google-restore');
+      const paypalContainer = document.getElementById('paypal-button-container');
+      const premiumStatus = document.getElementById('premium-status');
+      const hudLives = document.getElementById('hud-lives');
+
+      if (user) {
+        console.log("Auth state changed: logged in as", user.email);
+        window.gameAuthState.currentUserUid = user.uid;
+
+        // Hide Google buttons once logged in
+        if (btnGooglePurchase) btnGooglePurchase.style.display = 'none';
+        if (btnGoogleRestore) btnGoogleRestore.style.display = 'none';
+        if (promoText) promoText.style.display = 'none';
+
+        try {
+          const docRef = doc(db, "users", user.uid);
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists() && docSnap.data().isPremium) {
+            // User is already premium
+            window.gameAuthState.isPremium = true;
+            if (paypalContainer) paypalContainer.style.display = 'none';
+            if (premiumStatus) premiumStatus.style.display = 'block';
+            if (hudLives) hudLives.textContent = "5";
+          } else {
+            // User logged in but not premium — show PayPal
+            if (paypalContainer) paypalContainer.style.display = 'block';
+          }
+        } catch (e) {
+          console.error("Error reading premium status from Firestore:", e);
+          // Still show PayPal even if Firestore read fails
+          if (paypalContainer) paypalContainer.style.display = 'block';
+        }
+      } else {
+        console.log("Auth state changed: not logged in");
+        window.gameAuthState.currentUserUid = null;
+        window.gameAuthState.isPremium = false;
+        if (paypalContainer) paypalContainer.style.display = 'none';
+      }
+    });
+
+    // Attach login button listeners when DOM is ready
+    document.addEventListener('DOMContentLoaded', () => {
+      const btnGooglePurchase = document.getElementById('btn-google-purchase');
+      const btnGoogleRestore = document.getElementById('btn-google-restore');
+
+      const handleGoogleLogin = () => {
+        const provider = new GoogleAuthProvider();
+        signInWithPopup(auth, provider).then((result) => {
+          console.log("Google Sign-in Success:", result.user.email);
+        }).catch(error => {
+          console.error("Google Sign-in Error:", error);
+          alert("Google login failed: " + error.message);
+        });
+      };
+
+      if (btnGooglePurchase) btnGooglePurchase.addEventListener('click', handleGoogleLogin);
+      if (btnGoogleRestore) btnGoogleRestore.addEventListener('click', handleGoogleLogin);
+    });
+
+  </script>
 
   <!-- Error Log Overlay -->
   <div id="error-log"
@@ -259,6 +362,8 @@
       // ─────────────────────────────────────────────
       let lives, currentStep, gameActive, jumping;
       let bridgeData = [];  // [{leftSafe: bool, meshLeft, meshRight}]
+      let isPremium = false;
+      let currentUserUid = null;
 
       // DOM refs
       const hudLives = document.getElementById('hud-lives');
@@ -266,6 +371,19 @@
       const startOvl = document.getElementById('overlay-start');
       const successOvl = document.getElementById('overlay-success');
       const gameoverOvl = document.getElementById('overlay-gameover');
+
+      const promoText = document.getElementById('promo-text');
+      const btnGooglePurchase = document.getElementById('btn-google-purchase');
+      const btnGoogleRestore = document.getElementById('btn-google-restore');
+      const paypalContainer = document.getElementById('paypal-button-container');
+      const premiumStatus = document.getElementById('premium-status');
+
+      // Sync auth state from the global listener (registered in Firebase module script)
+      // This reads current values and stays in sync via reference
+      if (window.gameAuthState) {
+        isPremium = window.gameAuthState.isPremium;
+        currentUserUid = window.gameAuthState.currentUserUid;
+      }
 
       // ─────────────────────────────────────────────
       //  THREE.JS SETUP
@@ -819,7 +937,13 @@
         console.log("Initializing Game...");
         initAudio();
 
-        lives = 3;
+        // Re-sync premium status from global auth state
+        if (window.gameAuthState) {
+          isPremium = window.gameAuthState.isPremium;
+          currentUserUid = window.gameAuthState.currentUserUid;
+        }
+
+        lives = isPremium ? 5 : 3;
         currentStep = 0;
         gameActive = true;
         jumping = false;
@@ -850,6 +974,47 @@
         startOvl.classList.remove('active');
         successOvl.classList.remove('active');
         gameoverOvl.classList.remove('active');
+      }
+
+      // ─────────────────────────────────────────────
+      //  PAYPAL INTEGRATION
+      // ─────────────────────────────────────────────
+      if (window.paypal) {
+        paypal.Buttons({
+          style: { shape: 'rect', color: 'gold', layout: 'vertical', label: 'paypal' },
+          createOrder: function (data, actions) {
+            return actions.order.create({
+              purchase_units: [{
+                description: 'Glass Bridge 5 Lives Upgrade',
+                amount: { value: '0.50' }
+              }]
+            });
+          },
+          onApprove: function (data, actions) {
+            return actions.order.capture().then(async function (details) {
+              // Persist to Firebase
+              const uid = window.gameAuthState ? window.gameAuthState.currentUserUid : currentUserUid;
+              if (uid && window.firebaseServices) {
+                const { db, doc, setDoc } = window.firebaseServices;
+                try {
+                  await setDoc(doc(db, "users", uid), { isPremium: true }, { merge: true });
+                } catch (e) {
+                  console.error("Error saving premium status to Firestore:", e);
+                }
+              }
+
+              isPremium = true;
+              if (window.gameAuthState) window.gameAuthState.isPremium = true;
+              document.getElementById('paypal-button-container').style.display = 'none';
+              document.getElementById('premium-status').style.display = 'block';
+              hudLives.textContent = 5; // update UI if they see it early
+            });
+          },
+          onError: function (err) {
+            console.error("PayPal Error:", err);
+            alert("Payment encountered an error. Please try again.");
+          }
+        }).render('#paypal-button-container');
       }
 
       // Button listeners
