@@ -134,6 +134,48 @@
       margin-top: 6px;
     }
 
+    /* ── Premium Card ── */
+    .premium-card {
+      background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 140, 0, 0.1));
+      border: 1px solid rgba(255, 215, 0, 0.4);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(255, 215, 0, 0.2);
+      max-width: 320px;
+      margin: 10px auto 20px auto;
+      backdrop-filter: blur(4px);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .premium-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255, 215, 0, 0.3);
+    }
+
+    .premium-card h3 {
+      color: #ffd700;
+      font-size: 20px;
+      margin-bottom: 8px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .premium-card .card-desc {
+      font-size: 14px;
+      color: #eaeaea;
+      margin-bottom: 15px;
+      line-height: 1.4;
+    }
+
+    .premium-card .price-tag {
+      font-weight: bold;
+      color: #fff;
+      background: rgba(255, 215, 0, 0.3);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
     /* ── Footer ── */
     #footer {
       position: fixed;
@@ -165,17 +207,46 @@
     <p class="subtitle">Participant 107 — Choose wisely.</p>
     <p style="text-align: center;">Click a glass panel to jump.<br>Survive 10 rows.</p>
     <button id="btn-start" style="margin-bottom: 20px;">START GAME</button>
-    <p id="promo-text" style="font-size: 14px; margin-bottom: 10px; max-width: 300px; color: #ffeb3b;">🌟 Upgrade to 5
-      Lives for just $0.50!<br>Boost your chances and survive the bridge.</p>
-    <button id="btn-google-purchase"
-      style="margin-bottom: 10px; background-color: #4285F4; border-radius: 4px; border: none; padding: 10px 20px; font-weight: bold; cursor: pointer; color: white;">Sign
-      in with Google to Purchase</button>
-    <p id="btn-google-restore"
-      style="font-size: 12px; color: #bbb; text-decoration: underline; cursor: pointer; margin-bottom: 20px;">Already
-      purchased? Log in here to restore.</p>
-    <div id="paypal-button-container" style="width: 250px; max-width: 100%; display: none;"></div>
-    <p id="premium-status" style="color: #00ffc8; font-size: 16px; margin-top: 10px; display: none;">Premium VIP: 5
-      Lives Active!</p>
+
+    <div class="premium-card" id="premium-card">
+      <h3>💎 VIP Survival Pass</h3>
+      <p id="promo-text" class="card-desc">
+        Upgrade to <strong>5 Lives</strong> for <span class="price-tag">$0.50</span><br>
+        Boost your chances and survive!
+      </p>
+
+      <button id="btn-google-purchase"
+        style="width: 100%; margin-bottom: 12px; background-color: #ffffff; border-radius: 4px; border: 1px solid #dadce0; padding: 0; cursor: pointer; display: flex; align-items: center; box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3); transition: background-color .218s, border-color .218s, box-shadow .218s;">
+        <div
+          style="padding: 10px; display: flex; align-items: center; justify-content: center; background: #fff; border-radius: 4px 0 0 4px;">
+          <svg width="18" height="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+            <path fill="#FFC107"
+              d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4C12.955 4 4 12.955 4 24s8.955 20 20 20s20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z" />
+            <path fill="#FF3D00"
+              d="m6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4C16.318 4 9.656 8.337 6.306 14.691z" />
+            <path fill="#4CAF50"
+              d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238A11.91 11.91 0 0 1 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z" />
+            <path fill="#1976D2"
+              d="M43.611 20.083H42V20H24v8h11.303a12.04 12.04 0 0 1-4.087 5.571l.003-.002l6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z" />
+          </svg>
+        </div>
+        <div
+          style="flex-grow: 1; text-align: center; font-family: 'Roboto', arial, sans-serif; font-weight: 500; font-size: 14px; color: #3c4043; letter-spacing: .25px; padding-right: 18px;">
+          Sign in with Google to Purchase
+        </div>
+      </button>
+
+      <p id="btn-google-restore"
+        style="font-size: 12px; color: #bbb; text-decoration: underline; cursor: pointer; margin-bottom: 0;">
+        Already purchased? Log in to restore.
+      </p>
+
+      <div id="paypal-button-container" style="width: 100%; display: none; margin-top: 10px;"></div>
+
+      <p id="premium-status"
+        style="color: #00ffc8; font-size: 16px; font-weight: bold; margin-top: 10px; display: none;">✅ VIP: 5 Lives
+        Active!</p>
+    </div>
   </div>
 
   <!-- Success overlay -->
